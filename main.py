@@ -28,20 +28,32 @@ class User(db.Model):
 
 class TodoList(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(350), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User',
+        backref=db.backref('todo_list', lazy=True))
 
 class TodoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(350), unique=True, nullable=False)
+    todo_list_id = db.Column(db.Integer, db.ForeignKey('todo_list.id'))
+    todo_list = db.relationship('TodoList',
+        backref=db.backref('todo_item', lazy=True))
 
     def __repr__(self):
         return '<TodoItem %r>' % self.text
 
 # api
 class UserAPI(Resource):
-    def get(self, userId):
-        if listId not in todoLists:
-            return {}, 404
-        return {'data': todoLists[listId]}
+    def get(self, username):
+        user = User.query.filter_by(username=username).first()
+        return {'email': user.email, 'username': user.username}
+
+    def put(self, userId):
+        name = request.form['data']
+        new_user = User(name=name)
+        db.add(new_user)
+        db.commit()
 
 class TodoList(Resource):
     def get(self, listId):
@@ -57,12 +69,14 @@ class TodoItem(Resource):
         return {'data': todoLists[listId][itemId]}
 
 # urls
-api.add_resource(TodoList, '/<string:listId>')
-api.add_resource(TodoItem, '/<string:listId>/<string:itemId>')
+api.add_resource(UserAPI, '/user/<string:username>')
+api.add_resource(TodoList, '/todoList/<string:listId>')
+api.add_resource(TodoItem, '/todoItem/<string:listId>/<string:itemId>')
 app.register_blueprint(api_bp, url_prefix='/api')
 
-# manager
-# db.create_all()
-
 if __name__ == '__main__':
+    db.create_all()
+    # admin = User(username='admin', email='admin@example.com')
+    # db.session.add(admin)
+    db.session.commit()
     app.run()
