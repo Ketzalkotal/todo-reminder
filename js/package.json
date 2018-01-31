@@ -1,14 +1,14 @@
 {
   "name": "js",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Mithril-Based Todo App",
   "main": "index.js",
   "scripts": {
     "start": "webpack src/index.js ../static/app.js -d --watch",
     "build": "webpack src/index.js ../static/app.js -p"
   },
   "keywords": [],
-  "author": "",
+  "author": "James Daley",
   "license": "ISC",
   "dependencies": {
     "mithril": "^1.1.6",
