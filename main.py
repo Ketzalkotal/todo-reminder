@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+# the to_json helper method may need to be able to detect circular references
+# could pass a context that holds enough information to detect these circular references
 
 app = Flask(__name__)
 api_bp = Blueprint('api', __name__)
@@ -17,11 +19,38 @@ db = SQLAlchemy(app)
 def index():
     return render_template('index.html')
 
+# This decorator make sure that the API fails loudly
+def errorOnNone(fun):
+    def helper(*args, **kwargs):
+        returnVal = fun(*args, **kwargs)
+        if returnVal == None:
+            raise ValueError("Function {} returns None".format(fun))
+        return returnVal
+    return helper
+
 # models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+
+    def to_json(self):
+        return {
+            'username': self.username,
+            'email': self.email
+        }
+
+    @classmethod
+    @errorOnNone
+    def filter_json(cls, input_json):
+        """Simplifies Querying DB with API supplied JSON
+        """
+        if input_json.get('id'):
+            return cls.query.filter_by(id=input_json.get('id')).first()
+        if input_json.get('email'):
+            return cls.query.filter_by(email=input_json.get('email')).first()
+        if input_json.get('username'):
+            return cls.query.filter_by(username=input_json.get('username')).first()
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -32,6 +61,25 @@ class TodoList(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User',
         backref=db.backref('todo_list', lazy=True))
+
+    def to_json(self):
+        return {
+            'name': self.name,
+            'user': self.user.to_json(),
+        }
+
+    def from_json(self, input_json):
+        print 'in from_json'
+        print input_json
+        self.name = input_json.get('name', self.name)
+        user_json = input_json.get('user') # nested object / dict
+        if user_json:
+            print 'filtering user'
+            self.user = User.filter_json(user_json) # just contains user fields
+            print 'returned user is just none and throws no errors!: Problem!!!'
+            print self.user
+        # else:
+        #     raise ValueError("TodoList.from_json: User Missing")
 
 class TodoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,38 +93,86 @@ class TodoItem(db.Model):
 
 # api
 class UserAPI(Resource):
-    def get(self, username):
-        user = User.query.filter_by(username=username).first()
-        return {'email': user.email, 'username': user.username}
+    def get(self, id):
+        user = User.query.filter_by(id=id).first()
+        return {'email': user.email, 'username': user.username, 'id': id}
 
-    def put(self, userId):
-        name = request.form['data']
-        new_user = User(name=name)
-        db.add(new_user)
-        db.commit()
+    def put(self, id):
+        user = User.query.filter_by(id=id).first()
+        data = request.form
+        if not user:
+            user = User(**data) # old from json
+            print user
+            db.session.add(user)
+        else:
+            for key, value in data.items():
+                print key, value
+                setattr(user, key, value)
+        db.session.commit()
+        print user
+        return {'email': user.email, 'username': user.username, 'id': id}
 
-class TodoList(Resource):
-    def get(self, listId):
-        if listId not in todoLists:
+class TodoListsAPI(Resource):
+    def get(self):
+        admin = User.query.filter_by(id=1).first()
+        todoLists = TodoList.query.filter_by(user=admin).all()
+        if todoLists:
+            return [todoList.to_json() for todoList in todoLists]
+        else:
             return {}, 404
-        return {'data': todoLists[listId]}
 
-class TodoItem(Resource):
+    def put(self):
+        todoList = TodoList()
+        todoList.from_json(request.get_json()) # new from json because of user relation
+        # try:
+        #     todoList.from_json(request.get_json()) # new from json because of user relation
+        # except ValueError:
+        #     return {"message": "User Not Found"}, 404
+        db.session.add(todoList)
+        db.session.commit()
+        try:
+            return todoList.to_json()
+        except AttributeError:
+            return {"message": "User Not Found"}, 404
+
+class TodoListAPI(Resource):
+    def get(self, listId):
+        todoList = TodoList.query.filter_by(id=listId).first()
+        try:
+            return {'user': todoList.user.username, 'name': todoList.name}
+            # return todoList.__dict__
+        except:
+            return {}, 404
+
+    # TODO update logic
+    def put(self, id=None):
+        pass
+
+class TodoItemAPI(Resource):
     def get(self, listId, itemId):
-        if  listId not in todoLists or \
-            itemId not in todoLists.get(listId, {}):
-                return {}, 404
-        return {'data': todoLists[listId][itemId]}
+        pass
 
 # urls
-api.add_resource(UserAPI, '/user/<string:username>')
-api.add_resource(TodoList, '/todoList/<string:listId>')
-api.add_resource(TodoItem, '/todoItem/<string:listId>/<string:itemId>')
+api.add_resource(UserAPI, '/user/<int:id>')
+api.add_resource(TodoListsAPI, '/todoList')
+api.add_resource(TodoListAPI, '/todoList/<int:listId>')
+api.add_resource(TodoItemAPI, '/todoItem/<int:listId>/<int:itemId>')
 app.register_blueprint(api_bp, url_prefix='/api')
+
+def __initAdmin():
+    # TODO
+    # admin = User()
+    db.session.add(admin)
+    db.session.commit()
+    print [user.id for user in User.query.all()]
+    print User.query.filter_by(id=1).first()
+
+def __initList():
+    admin = User.query.filter_by(id=1).first()
+    todoList = TodoList(name='Test List', user=admin)
+    db.session.add(todoList)
+    db.session.commit()
 
 if __name__ == '__main__':
     db.create_all()
-    # admin = User(username='admin', email='admin@example.com')
-    # db.session.add(admin)
-    # db.session.commit()
     app.run()
