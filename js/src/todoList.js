@@ -1,23 +1,21 @@
 var m = require('mithril');
 
+var list = [];
+
 module.exports = {
   oninit: function(vnode){
-    var listId = 1;
+    // var listId = 1;
+    var username = 'admin';
     m.request({
       method: "GET",
-      url: `api/todoList/${listId}`,
+      url: `api/user/${username}/todoLists`
     }).then(function(result){
-      console.log('Then');
-      console.log(result);
+      list = result.map(item => m('li', item.name));
     }).catch(function(error){
-      console.log('Error');
       console.log(error);
     });
   },
   view: function(){
-    return m('ol', [
-      m('li','one'),
-      m('li','two'),
-    ])
+    return m('ol', list)
   }
 }

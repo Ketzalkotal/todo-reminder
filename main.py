@@ -3,6 +3,15 @@ from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 import os
 
+# TODO: Show admin todoLists
+# TODO: Show admin todoItems
+# TODO: Set time for todo item
+# TODO: The UI should allow the user to quickly create a reminder due today
+# or tomorrow
+# TODO: Connect User to Google Account
+# TODO: Create Google Calendar Event from Todo
+# TODO: Migrate schema without data loss?
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 # the to_json helper method may need to be able to detect circular references
 # could pass a context that holds enough information to detect these circular references
@@ -62,11 +71,14 @@ class TodoList(db.Model):
     user = db.relationship('User',
         backref=db.backref('todo_list', lazy=True))
 
-    def to_json(self):
-        return {
-            'name': self.name,
-            'user': self.user.to_json(),
+    def to_json(self, related=[]):
+        # default values
+        result = {
+            'name': self.name
         }
+        if 'user' in related:
+            result['user'] = self.user.to_json()
+        return result
 
     def from_json(self, input_json):
         print 'in from_json'
@@ -135,6 +147,17 @@ class TodoListsAPI(Resource):
         except AttributeError:
             return {"message": "User Not Found"}, 404
 
+class UserListsAPI(Resource):
+    def get(self, username):
+        user = User.query.filter_by(username=username).first()
+        # return TodoList.helper.filter_or_404(user=user)
+        # TODO: replace below section with above line
+        todoLists = TodoList.query.filter_by(user=user).all()
+        if todoLists:
+            return [todoList.to_json() for todoList in todoLists]
+        else:
+            return {}, 404
+
 class TodoListAPI(Resource):
     def get(self, listId):
         todoList = TodoList.query.filter_by(id=listId).first()
@@ -154,6 +177,7 @@ class TodoItemAPI(Resource):
 
 # urls
 api.add_resource(UserAPI, '/user/<int:id>')
+api.add_resource(UserListsAPI, '/user/<string:username>/todoLists')
 api.add_resource(TodoListsAPI, '/todoList')
 api.add_resource(TodoListAPI, '/todoList/<int:listId>')
 api.add_resource(TodoItemAPI, '/todoItem/<int:listId>/<int:itemId>')
