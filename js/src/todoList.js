@@ -7,7 +7,17 @@ var state = {
         state.value = v;
     },
     list: [],
-    listItems: []
+    listItems: [],
+    updateList: function(){
+        this.list = this.listItems.map((item, index) => m(ListItem, {name: item.name, index: index}));
+    },
+    deleteList: function(index){
+        console.log(`delete stub ${index}`);
+    }
+}
+
+function failureMessage(message){
+    alert(message);
 }
 
 function submit(e){
@@ -29,12 +39,25 @@ function submit(e){
     });
 }
 
+function del(index){
+    return function(e){
+        m.request({
+          method: "DELETE",
+          url: `api/${state.user}/todoList/${index}`,
+        }).then(function(result){
+            // TODO: delete it from state
+            state.deleteList(index);
+        }).catch(alert);
+    }
+}
+
 var InputTodo = {
     view: function(vnode){
         return m('div', [
             m('input', {
                 type: 'text',
                 oninput: m.withAttr("value", state.setValue),
+                onkeyup: function(e){ if(e.key === "Enter") submit(e) },
                 value: state.value,
             }),
             m('button', {
@@ -42,6 +65,19 @@ var InputTodo = {
                 onclick: submit
             }, 'Add')
         ]);
+    }
+}
+
+var ListItem = {
+    view: function(vnode){
+        return m('li',
+            m('div', [
+                m('button.delete', {
+                    onclick: del(vnode.attrs.index),
+                }, 'X'),
+                vnode.attrs.name,
+            ])
+        );
     }
 }
 
@@ -57,7 +93,7 @@ module.exports = {
     });
   },
   view: function(vnode){
-    state.list = state.listItems.map(item => m('li', item.name));
+    state.updateList()
     return m('div', [
         m(InputTodo),
         m('ol', state.list)

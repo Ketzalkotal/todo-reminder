@@ -3,7 +3,7 @@ from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-# TODO: Show admin todoLists
+# TODO: Delete todoLists
 # TODO: Show admin todoItems
 # TODO: Set time for todo item
 # TODO: The UI should allow the user to quickly create a reminder due today
@@ -176,8 +176,14 @@ class TodoItemAPI(Resource):
         pass
 
 # urls
+# /user/<username>/list/<id>
+# /user/<username>/list
+# returns all lists for user
+# /user/<username>/list/<listId>
+# /user/<username>/list/<listId>/<itemId>
 api.add_resource(UserAPI, '/user/<int:id>')
 api.add_resource(UserListsAPI, '/user/<string:username>/todoLists')
+# below should only work with user verification
 api.add_resource(TodoListsAPI, '/todoList')
 api.add_resource(TodoListAPI, '/todoList/<int:listId>')
 api.add_resource(TodoItemAPI, '/todoItem/<int:listId>/<int:itemId>')
