@@ -5,6 +5,7 @@ import os
 
 # TODO: Delete todoLists
 # TODO: Show admin todoItems
+# TODO: Delete todoItems
 # TODO: Set time for todo item
 # TODO: The UI should allow the user to quickly create a reminder due today
 # or tomorrow
@@ -74,7 +75,8 @@ class TodoList(db.Model):
     def to_json(self, related=[]):
         # default values
         result = {
-            'name': self.name
+            'name': self.name,
+            'id': self.id
         }
         if 'user' in related:
             result['user'] = self.user.to_json()
@@ -158,6 +160,18 @@ class UserListsAPI(Resource):
         else:
             return {}, 404
 
+class UserListsDeleteAPI(Resource):
+    def delete(self, username, listID):
+        # user = User.query.filter_by(username=username).first()
+        # don't need username
+        try:
+            todoList = TodoList.query.filter_by(id=listID).first()
+            db.session.delete(todoList)
+            db.session.commit()
+            return {"status": "success"}
+        except:
+            return {}, 404
+
 class TodoListAPI(Resource):
     def get(self, listId):
         todoList = TodoList.query.filter_by(id=listId).first()
@@ -183,6 +197,7 @@ class TodoItemAPI(Resource):
 # /user/<username>/list/<listId>/<itemId>
 api.add_resource(UserAPI, '/user/<int:id>')
 api.add_resource(UserListsAPI, '/user/<string:username>/todoLists')
+api.add_resource(UserListsDeleteAPI, '/user/<string:username>/todoList/<int:listID>')
 # below should only work with user verification
 api.add_resource(TodoListsAPI, '/todoList')
 api.add_resource(TodoListAPI, '/todoList/<int:listId>')

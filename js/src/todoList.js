@@ -6,13 +6,28 @@ var state = {
     setValue: function(v){
         state.value = v;
     },
-    list: [],
-    listItems: [],
-    updateList: function(){
-        this.list = this.listItems.map((item, index) => m(ListItem, {name: item.name, index: index}));
+    list: [], // m components
+    listItems: [], // raw data: {name: str, id: int}
+    schemas: {
+        listItems:{
+            name: "string",
+            id: "number"
+        },
     },
-    deleteList: function(index){
-        console.log(`delete stub ${index}`);
+    updateList: function(){
+        state.list = state.listItems.map(item => m(ListItem, {name: item.name, index: item.id}));
+    },
+    deleteList: function(listID){
+        state.listItems = state.listItems.filter(item => item.id !== listID);
+    },
+    requestList:function(){
+        var username = 'admin';
+        m.request({
+          method: "GET",
+          url: `api/user/${username}/todoLists`
+        }).then(function(result){
+          state.listItems = result;
+        });
     }
 }
 
@@ -34,19 +49,18 @@ function submit(e){
           name: state.value
       }
     }).then(function(result){
-      state.listItems.push({name: state.value});
+      state.listItems.push({name: state.value, id: result.id}); // bad name
       state.value = "";
     });
 }
 
-function del(index){
+function del(listID){
     return function(e){
         m.request({
           method: "DELETE",
-          url: `api/${state.user}/todoList/${index}`,
+          url: `api/user/${state.username}/todoList/${listID}`,
         }).then(function(result){
-            // TODO: delete it from state
-            state.deleteList(index);
+            state.deleteList(listID);
         }).catch(alert);
     }
 }
@@ -57,7 +71,7 @@ var InputTodo = {
             m('input', {
                 type: 'text',
                 oninput: m.withAttr("value", state.setValue),
-                onkeyup: function(e){ if(e.key === "Enter") submit(e) },
+                onkeyup: function(e){ e.redraw = false; if(e.key === "Enter") submit(e) },
                 value: state.value,
             }),
             m('button', {
@@ -83,14 +97,7 @@ var ListItem = {
 
 module.exports = {
   oninit: function(vnode){
-    // var listId = 1;
-    var username = 'admin';
-    m.request({
-      method: "GET",
-      url: `api/user/${username}/todoLists`
-    }).then(function(result){
-      state.listItems = result;
-    });
+      state.requestList();
   },
   view: function(vnode){
     state.updateList()
