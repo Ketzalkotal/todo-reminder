@@ -1,5 +1,5 @@
 var m = require('mithril');
-var AjaxWrapper = require('./Ajax');
+var AjaxWrapper = require('../Ajax');
 
 module.exports = function(state){
     return {

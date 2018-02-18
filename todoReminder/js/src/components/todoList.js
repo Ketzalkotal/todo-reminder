@@ -1,6 +1,6 @@
 var m = require('mithril');
-var state = require('./state');
-var AjaxWrapper = require('./Ajax');
+var state = require('../state');
+var AjaxWrapper = require('../Ajax');
 var Ajax = AjaxWrapper(state);
 
 function failureMessage(message){

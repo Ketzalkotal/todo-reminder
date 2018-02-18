@@ -1,5 +1,5 @@
 var m = require('mithril');
-var ListItemWrapper = require('./listItem');
+var ListItemWrapper = require('./components/listItem');
 
 var state = {
     username: "admin",
