@@ -3,29 +3,20 @@ var m = require('mithril');
 module.exports = function(state){
     return {
         del: function(listID){
-            console.log('del func');
-            console.log(state);
             return function(e){
-                console.log('ret func');
-                console.log(state);
                 m.request({
                   method: "DELETE",
                   url: `api/user/${state.username}/todoList/${listID}`,
                 }).then(function(result){
-                    console.log('delete list');
-                    console.log(state);
                     state.deleteList(listID);
                 }).catch(alert);
             }
         },
         requestList:function(){
-            console.log('req list func');
-            console.log(state);
             m.request({
               method: "GET",
               url: `api/user/${state.username}/todoList`
             }).then(function(result){
-              console.log(result);
               state.listItems = result;
             });
         },

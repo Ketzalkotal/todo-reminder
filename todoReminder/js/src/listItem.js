@@ -5,8 +5,6 @@ module.exports = function(state){
     return {
         view: function(vnode){
             var Ajax = AjaxWrapper(state);
-            console.log('litem state')
-            console.log(state)
             return m('li',
                 m('div', [
                     m('button.delete', {
