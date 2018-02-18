@@ -5,9 +5,8 @@ from flask_sqlalchemy import SQLAlchemy
 import views
 from todoReminder import app
 from todoReminder import db
-from models import __initAdmin
+from todoReminder.models import __initAdmin
 
-# TODO: Delete todoLists
 # TODO: Show admin todoItems
 # TODO: Delete todoItems
 # TODO: Set time for todo item
