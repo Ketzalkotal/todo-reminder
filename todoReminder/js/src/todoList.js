@@ -24,7 +24,7 @@ var state = {
         var username = 'admin';
         m.request({
           method: "GET",
-          url: `api/user/${username}/todoLists`
+          url: `api/user/${username}/todoList`
         }).then(function(result){
           state.listItems = result;
         });
