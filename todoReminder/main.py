@@ -9,18 +9,19 @@ from todoReminder.models import __initAdmin
 
 # TODO: Show admin todoItems
 # TODO: Delete todoItems
+# TODO: Marshmallow schema
 # TODO: Set time for todo item
 # TODO: The UI should allow the user to quickly create a reminder due today
 # or tomorrow
 # TODO: Connect User to Google Account
 # TODO: Create Google Calendar Event from Todo
-# TODO: Migrate schema without data loss?
+# TODO: Flask Migrate
 
+app, api = views.viewConstructor(app)
+try:
+    db.create_all()
+    __initAdmin()
+except:
+    pass
 if __name__ == '__main__':
-    app, api = views.viewConstructor(app)
-    try:
-        db.create_all()
-        __initAdmin()
-    except:
-        pass
     app.run()

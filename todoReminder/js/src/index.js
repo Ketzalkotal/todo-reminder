@@ -1,6 +1,6 @@
 var m = require("mithril");
-var TodoList = require("./todoList");
+var Todos = require("./todoList");
 
-m.route(document.body, "/todo", {
-    "/todo":  TodoList,
+m.route(document.body, "/todos", {
+    "/todos": Todos,
 })

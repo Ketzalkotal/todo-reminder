@@ -15,6 +15,16 @@ class UserLists(Resource):
         else:
             return {}, 404
 
+    def put(self, username):
+        todoList = models.TodoList()
+        todoList.from_json(request.get_json())
+        db.session.add(todoList)
+        db.session.commit()
+        try:
+            return todoList.to_json()
+        except AttributeError:
+            return {"message": "User Not Found"}, 404
+
     def delete(self, username, listID):
         try:
             todoList = models.TodoList.query.filter_by(id=listID).first()

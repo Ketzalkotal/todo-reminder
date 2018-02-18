@@ -18,10 +18,9 @@ def viewConstructor(app):
     api = Api(api_bp)
     api.add_resource(User, '/user/<int:id>')
     api.add_resource(UserLists,
-        '/user/<string:username>/todoList/<int:listID>',
-        '/user/<string:username>/todoList')
+        '/user/<string:username>/todoList',
+        '/user/<string:username>/todoList/<int:listID>')
     # below should only work with user verification
-    api.add_resource(TodoLists, '/todoList')
     api.add_resource(TodoList, '/todoList/<int:listId>')
     app.register_blueprint(api_bp, url_prefix='/api')
     # SPA entrypoint

@@ -6,14 +6,22 @@ A todo app that creates reminders through Google Calendar.
 virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python main.py
+```
+Run as a module
+```sh
+python -m todoReminder.main
+```
+Or through flask
+```sh
+source VARS.sh
+flask todoReminder/main.py
 ```
 
 ## Javascript
 ```sh
 cd js
 npm install
-npm build
+npm run start
 ```
 
 ## Lazy Man's Graphql
