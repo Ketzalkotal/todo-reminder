@@ -1,10 +1,11 @@
+import os
 from flask import Flask, Blueprint, request, render_template
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-import os
 import views
 from todoReminder import app
-from __init__ import db
+from todoReminder import db
+from models import __initAdmin
 
 # TODO: Delete todoLists
 # TODO: Show admin todoItems
@@ -17,8 +18,11 @@ from __init__ import db
 # TODO: Migrate schema without data loss?
 
 app, api = views.viewConstructor(app)
-# This decorator make sure that the API fails loudly
 
 if __name__ == '__main__':
-    db.create_all()
+    # db.create_all()
+    try:
+        __initAdmin()
+    except:
+        pass
     app.run()

@@ -1,9 +1,9 @@
+import os
 from flask import Flask, Blueprint, request, render_template
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-import os
 import views
-from __init__ import db
+from todoReminder import db
 
 def errorOnNone(fun):
     def helper(*args, **kwargs):
@@ -19,6 +19,8 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
+    # the to_json helper method may need to be able to detect circular references
+    # could pass a context that holds enough information to detect these circular references
     def to_json(self):
         return {
             'username': self.username,
@@ -63,12 +65,11 @@ class TodoList(db.Model):
         self.name = input_json.get('name', self.name)
         user_json = input_json.get('user') # nested object / dict
         if user_json:
-            print 'filtering user'
-            self.user = User.filter_json(user_json) # just contains user fields
-            print 'returned user is just none and throws no errors!: Problem!!!'
-            print self.user
-        # else:
-        #     raise ValueError("TodoList.from_json: User Missing")
+            try:
+                self.user = User.filter_json(user_json) # just contains user fields
+                print self.user
+            except:
+                raise ValueError("TodoList.from_json: User Missing")
 
 class TodoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -81,8 +82,7 @@ class TodoItem(db.Model):
         return '<TodoItem %r>' % self.text
 
 def __initAdmin():
-    # TODO
-    # admin = User()
+    admin = User(username="admin", email="admin@gmail.com")
     db.session.add(admin)
     db.session.commit()
     print [user.id for user in User.query.all()]

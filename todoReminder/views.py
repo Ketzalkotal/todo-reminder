@@ -1,8 +1,11 @@
+import os
 from flask import Flask, Blueprint, request, render_template
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-import os
-from models import *
+from todoReminder import db
+from models import User
+from models import TodoList
+from models import TodoItem
 
 # api
 class UserAPI(Resource):
@@ -80,14 +83,6 @@ class TodoListAPI(Resource):
         except:
             return {}, 404
 
-    # TODO update logic
-    def put(self, id=None):
-        pass
-
-class TodoItemAPI(Resource):
-    def get(self, listId, itemId):
-        pass
-
 # urls
 # /user/<username>/list/<id>
 # /user/<username>/list
@@ -104,7 +99,6 @@ def viewConstructor(app):
     # below should only work with user verification
     api.add_resource(TodoListsAPI, '/todoList')
     api.add_resource(TodoListAPI, '/todoList/<int:listId>')
-    api.add_resource(TodoItemAPI, '/todoItem/<int:listId>/<int:itemId>')
     app.register_blueprint(api_bp, url_prefix='/api')
     # SPA entrypoint
     @app.route('/')
