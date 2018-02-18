@@ -16,11 +16,10 @@ from todoReminder.models import __initAdmin
 # TODO: Create Google Calendar Event from Todo
 # TODO: Migrate schema without data loss?
 
-app, api = views.viewConstructor(app)
-
 if __name__ == '__main__':
-    # db.create_all()
+    app, api = views.viewConstructor(app)
     try:
+        db.create_all()
         __initAdmin()
     except:
         pass

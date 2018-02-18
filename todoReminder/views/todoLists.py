@@ -3,21 +3,19 @@ from flask import Flask, Blueprint, request, render_template
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from todoReminder import db
-from todoReminder.models import User
-from todoReminder.models import TodoList
-from todoReminder.models import TodoItem
+from todoReminder import models
 
-class TodoListsAPI(Resource):
+class TodoLists(Resource):
     def get(self):
-        admin = User.query.filter_by(id=1).first()
-        todoLists = TodoList.query.filter_by(user=admin).all()
+        admin = models.User.query.filter_by(id=1).first()
+        todoLists = models.TodoList.query.filter_by(user=admin).all()
         if todoLists:
             return [todoList.to_json() for todoList in todoLists]
         else:
             return {}, 404
 
     def put(self):
-        todoList = TodoList()
+        todoList = models.TodoList()
         todoList.from_json(request.get_json()) # new from json because of user relation
         # try:
         #     todoList.from_json(request.get_json()) # new from json because of user relation
