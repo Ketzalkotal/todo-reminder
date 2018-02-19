@@ -3,23 +3,21 @@ var state = require('../state');
 var AjaxWrapper = require('../Ajax');
 var Ajax = AjaxWrapper(state);
 
-function failureMessage(message){
-    alert(message);
-}
-
 var InputTodo = {
     view: function(vnode){
-        return m('div', [
-            m('input', {
-                type: 'text',
-                oninput: m.withAttr("value", state.setValue),
-                onkeyup: function(e){ e.redraw = false; if(e.key === "Enter") Ajax.submit(e) },
-                value: state.value,
-            }),
-            m('button', {
-                type: 'submit',
-                onclick: Ajax.submit
-            }, 'Add')
+        return m('div', {class: "ui segment"}, [
+            m('div', {class: "ui fluid action huge input"}, [
+                m('input', {
+                    type: 'text',
+                    oninput: m.withAttr("value", state.setValue),
+                    onkeyup: function(e){ e.redraw = false; if(e.key === "Enter") Ajax.submit(e) },
+                    value: state.value,
+                }),
+                m('div', {
+                    onclick: Ajax.submit,
+                    class: 'ui button'
+                }, 'Add')
+            ])
         ]);
     }
 }
@@ -30,9 +28,9 @@ module.exports = {
   },
   view: function(vnode){
     state.updateList();
-    return m('div', [
+    return m('div', {class: "main ui container"}, [
         m(InputTodo),
-        m('ol', state.list)
+        m('div', {class: 'ui relaxed middle aligned divided list'}, state.list)
     ])
   }
 }
