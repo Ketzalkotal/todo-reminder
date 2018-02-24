@@ -2,7 +2,7 @@ import os
 from flask import Flask, Blueprint, request, render_template
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-import views
+import todoReminder.views as views
 from todoReminder import app
 from todoReminder import db
 from todoReminder.models import __initAdmin

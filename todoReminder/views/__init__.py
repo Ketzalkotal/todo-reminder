@@ -3,7 +3,6 @@ from flask_restful import Api
 from user import User
 from userLists import UserLists
 # from userListsDelete import UserListsDelete
-from todoLists import TodoLists
 from todoList import TodoList
 
 # urls

@@ -28,7 +28,7 @@ module.exports = {
   },
   view: function(vnode){
     state.updateList();
-    return m('div', {class: "main ui container"}, [
+    return m('div', {class: "main ui text container"}, [
         m(InputTodo),
         m('div', {class: 'ui relaxed middle aligned divided list'}, state.list)
     ])
