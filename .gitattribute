@@ -1,1 +1,2 @@
--todoReminder/static/* linguist-vendored
+todoReminder/static/semantic.css linguist-vendored=false
+todoReminder/static/semantic.min.css linguist-vendored=false
